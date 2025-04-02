@@ -1,9 +1,6 @@
-"""
-Сервис взаимодействия приложения 'QRKot' с Google API.
-"""
 from datetime import datetime
-
 from typing import List
+
 from aiogoogle import Aiogoogle
 
 from app.models import CharityProject

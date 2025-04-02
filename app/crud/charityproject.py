@@ -26,9 +26,9 @@ class CRUDCharityProject(CRUDBase):
         ) - extract('epoch', CharityProject.create_date)
 
         return (
-            await session.execute(select(CharityProject).where(
-                CharityProject.fully_invested
-            )).order_by(result)
+            await session.execute(
+                select(CharityProject).where(CharityProject.fully_invested)
+            ).order_by(result)
         ).scalars().all()
 
 
