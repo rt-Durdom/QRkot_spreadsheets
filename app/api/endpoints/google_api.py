@@ -41,9 +41,10 @@ async def get_report(
             wrapper_services,
         )
 
-        return project, spreadsheet_id, spreadsheet_url
-    except ValueError:
+        
+    except ValueError as ex:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail='Ошибка при создании отчета'
+            detail=f'Ошибка при создании отчета:{ex}'
         )
+    return spreadsheet_url
