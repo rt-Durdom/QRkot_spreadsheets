@@ -1,5 +1,5 @@
 from aiogoogle import Aiogoogle
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
@@ -26,13 +26,23 @@ async def get_report(
         wrapper_services: Aiogoogle = Depends(get_service)
 
 ):
-    project = await project_crud_chrt.get_projects_by_completion_rate(session)
-    spreadsheetid = await spreadsheets_create(wrapper_services)
-    await set_user_permissions(spreadsheetid, wrapper_services)
-    await spreadsheets_update_value(
-        spreadsheetid,
-        project,
-        wrapper_services,
-    )
+    try:
+        project = await project_crud_chrt.get_projects_by_completion_rate(
+            session
+        )
+        spreadsheet_id, spreadsheet_url = await spreadsheets_create(
+            wrapper_services
+        )
+        await set_user_permissions(spreadsheet_id, wrapper_services)
+        await spreadsheets_update_value(
+            spreadsheet_id,
+            project,
+            wrapper_services,
+        )
 
-    return project
+        return project, spreadsheet_id, spreadsheet_url
+    except Exception as ex:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка при создании отчета: {str(ex)}"
+        )

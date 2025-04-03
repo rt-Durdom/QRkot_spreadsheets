@@ -8,11 +8,27 @@ from typing import Optional
 MIN_PASSWORD_LENGTH = 3
 MIN_LENGTH = 1
 MAX_LENGTH = 100
-
-FORMAT = "%Y/%m/%d %H:%M:%S"
-COLS = 10
-ROWS = 100  # Ряды таблицы в Google API
-RANGE = 'A1:C30'
+FORMAT = '%Y/%m/%d %H:%M:%S'
+SPREADSHEET_BODY = dict(
+    properties=dict(
+        title=None,
+        locale='ru_RU'
+    ),
+    sheets=[dict(properties=dict(
+        sheetType='GRID',
+        sheetId=0,
+        title='Лист1',
+        gridProperties=dict(
+            rowCount=100,
+            columnCount=10
+        )
+    ))]
+)
+HEADER = [
+    ['Отчёт от', None],
+    ['Топ проектов по скорости закрытия.'],
+    ['Название проекта', 'Время сбора', 'Описание']
+]
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -31,7 +47,6 @@ class Settings(BaseSettings):
     secret: str = 'SECRET'
     first_superuser_email: Optional[EmailStr] = None
     first_superuser_password: Optional[str] = None
-    # googlesheets
     type: Optional[str] = None
     project_id: Optional[str] = None
     private_key_id: Optional[str] = None

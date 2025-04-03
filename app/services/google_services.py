@@ -1,28 +1,25 @@
+from copy import deepcopy
 from datetime import datetime
 from typing import List
 
 from aiogoogle import Aiogoogle
 
 from app.models import CharityProject
-from app.core.config import settings, FORMAT, COLS, ROWS, RANGE
+from app.core.config import (
+    settings, FORMAT, SPREADSHEET_BODY, HEADER
+)
 
 
-async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
+async def spreadsheets_create(wrapper_services: Aiogoogle) -> tuple[str, str]:
     now_date_time = datetime.now().strftime(FORMAT)
     service = await wrapper_services.discover('sheets', 'v4')
-    spreadsheet_body = {
-        'properties': {'title': f'Отчёт от {now_date_time}',
-                       'locale': 'ru_RU'},
-        'sheets': [{'properties': {
-            'sheetType': 'GRID',
-            'sheetId': 0,
-            'title': 'Лист1',
-            'gridProperties': {'rowCount': ROWS, 'columnCount': COLS}
-        }}]
-    }
-
-    return await wrapper_services.as_service_account(
+    spreadsheet_body = deepcopy(SPREADSHEET_BODY)
+    spreadsheet_body['properties']['title'] = f'Отчёт от {now_date_time}'
+    spreadsheet_id = await wrapper_services.as_service_account(
         service.spreadsheets.create(json=spreadsheet_body))['spreadsheetId']
+
+    return (spreadsheet_id,
+            f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}')
 
 
 async def set_user_permissions(
@@ -37,29 +34,29 @@ async def set_user_permissions(
         service.permissions.create(
             fileId=spreadsheet_id,
             json=permissions_body,
-            fields="id"
+            fields='id'
         ))
 
 
 async def spreadsheets_update_value(
-        spreadsheetid: str,
+        spreadsheet_id: str,
         projects: List[CharityProject],
         wrapper_services: Aiogoogle
 ):
     now_date_time = datetime.now().strftime(FORMAT)
     service = await wrapper_services.discover('sheets', 'v4')
-    table_values = [
-        ['Отчёт от', now_date_time],
-        ['Топ проектов по скорости закрытия.'],
-        ['Название проекта', 'Время сбора', 'Описание']
+    table_values = deepcopy(HEADER)
+    table_values[0][1] = now_date_time
+    data = [
+        [str(project.name),
+         str(project.close_date - project.create_date),
+         str(project.description)]
+        for project in projects
     ]
-    for project in projects:
-        new_row = [
-            str(project.name),
-            str(project.close_date - project.create_date),
-            str(project.description),
-        ]
-        table_values.append(new_row)
+    table_values.extend(data)
+    rows = len(table_values)
+    cols = max(len(row) for row in table_values)
+    range = f'R1C1:R{rows}C{cols}'
 
     update_body = {
         'majorDimension': 'ROWS',
@@ -67,8 +64,8 @@ async def spreadsheets_update_value(
     }
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
-            spreadsheetId=spreadsheetid,
-            range=RANGE,
+            spreadsheetId=spreadsheet_id,
+            range=range,
             valueInputOption='USER_ENTERED',
             json=update_body
         )

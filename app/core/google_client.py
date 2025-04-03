@@ -8,7 +8,7 @@ SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ]
-# Формируем словарь с учётными данными сервисного аккаунта
+
 INFO = {
     'type': settings.type,
     'project_id': settings.project_id,

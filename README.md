@@ -13,12 +13,12 @@
 Реализация логики автоматического инвестирования пожертвованных средств в открытые проекты до полного их финансирования.
 
 
-Инструменты и стек технологий: #Python, #FastAPI, #JWT, #SQLAlchemy AsyncSession, #Postman, #SQLite
+Инструменты и стек технологий: #Python, #FastAPI, #JWT, #SQLAlchemy AsyncSession, #Postman, #SQLite, #Google API
 
 Как запустить проект
 1. Клонируйте репозиторий:
 ```
-git clone https://github.com/rt-Durdom/cat_charity_fund.git
+git clone git@github.com:rt-Durdom/QRkot_spreadsheets.git
 ```
 2. Перейдите в каталог проекта, а затем создайте и активируйте виртуальное окружения:
 ```

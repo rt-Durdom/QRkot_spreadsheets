@@ -97,8 +97,12 @@ async def update_project(
             obj_in.full_amount, project_id, session
         )
     up_project = await project_crud_chrt.update(
-        project, obj_in, session
+        project, obj_in, session, commit=False
     )
+    session.add_all(invest_mode(
+        up_project,
+        await donation_crud.free_objects(session)
+    ))
     await session.commit()
     await session.refresh(up_project)
     return up_project
