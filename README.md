@@ -22,7 +22,7 @@ git clone git@github.com:rt-Durdom/QRkot_spreadsheets.git
 ```
 2. Перейдите в каталог проекта, а затем создайте и активируйте виртуальное окружения:
 ```
-cd /<'Ваша директория'>/cat_charity_fund
+cd /QRkot_spreadsheets/
 py -m venv venv
 source venv/bin/activate
 ```

@@ -26,14 +26,15 @@ async def get_report(
         wrapper_services: Aiogoogle = Depends(get_service)
 
 ):
+
+    project = await project_crud_chrt.get_projects_by_completion_rate(
+        session
+    )
+    spreadsheet_id, spreadsheet_url = await spreadsheets_create(
+        wrapper_services
+    )
+    await set_user_permissions(spreadsheet_id, wrapper_services)
     try:
-        project = await project_crud_chrt.get_projects_by_completion_rate(
-            session
-        )
-        spreadsheet_id, spreadsheet_url = await spreadsheets_create(
-            wrapper_services
-        )
-        await set_user_permissions(spreadsheet_id, wrapper_services)
         await spreadsheets_update_value(
             spreadsheet_id,
             project,
@@ -41,8 +42,8 @@ async def get_report(
         )
 
         return project, spreadsheet_id, spreadsheet_url
-    except Exception as ex:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ошибка при создании отчета: {str(ex)}"
+            detail='Ошибка при создании отчета'
         )

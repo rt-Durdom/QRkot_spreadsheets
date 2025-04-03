@@ -6,7 +6,8 @@ from aiogoogle import Aiogoogle
 
 from app.models import CharityProject
 from app.core.config import (
-    settings, FORMAT, SPREADSHEET_BODY, HEADER
+    settings, FORMAT, SPREADSHEET_BODY, HEADER,
+    SPREADSHEET_ROWS, SPREADSHEET_COLS
 )
 
 
@@ -16,10 +17,10 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> tuple[str, str]:
     spreadsheet_body = deepcopy(SPREADSHEET_BODY)
     spreadsheet_body['properties']['title'] = f'Отчёт от {now_date_time}'
     spreadsheet_id = await wrapper_services.as_service_account(
-        service.spreadsheets.create(json=spreadsheet_body))['spreadsheetId']
+        service.spreadsheets.create(json=spreadsheet_body))
 
-    return (spreadsheet_id,
-            f'https://docs.google.com/spreadsheets/d/{spreadsheet_id}')
+    return (spreadsheet_id['spreadsheetId'],
+            spreadsheet_id['spreadsheetUrl'])
 
 
 async def set_user_permissions(
@@ -55,9 +56,12 @@ async def spreadsheets_update_value(
     ]
     table_values.extend(data)
     rows = len(table_values)
-    cols = max(len(row) for row in table_values)
-    range = f'R1C1:R{rows}C{cols}'
-
+    cols = max(map(len, table_values))
+    if rows > SPREADSHEET_ROWS or cols > SPREADSHEET_COLS:
+        raise ValueError(
+            f'Нет места. Необходимо: {rows} строк, {cols} колонок. '
+            f'Имеется: {SPREADSHEET_ROWS} строк, {SPREADSHEET_COLS} колонок.'
+        )
     update_body = {
         'majorDimension': 'ROWS',
         'values': table_values
@@ -65,7 +69,7 @@ async def spreadsheets_update_value(
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range=range,
+            range=f'R1C1:R{rows}C{cols}',
             valueInputOption='USER_ENTERED',
             json=update_body
         )

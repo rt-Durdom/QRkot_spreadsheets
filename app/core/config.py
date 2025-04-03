@@ -9,6 +9,9 @@ MIN_PASSWORD_LENGTH = 3
 MIN_LENGTH = 1
 MAX_LENGTH = 100
 FORMAT = '%Y/%m/%d %H:%M:%S'
+SPREADSHEET_ROWS = 100
+SPREADSHEET_COLS = 10
+
 SPREADSHEET_BODY = dict(
     properties=dict(
         title=None,
@@ -19,8 +22,8 @@ SPREADSHEET_BODY = dict(
         sheetId=0,
         title='Лист1',
         gridProperties=dict(
-            rowCount=100,
-            columnCount=10
+            rowCount=SPREADSHEET_ROWS,
+            columnCount=SPREADSHEET_COLS
         )
     ))]
 )
